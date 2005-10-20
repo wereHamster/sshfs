@@ -1748,6 +1748,20 @@ static int sshfs_write(const char *path, const char *wbuf, size_t size,
     return err ? err : (int) size;
 }
 
+static int sshfs_statfs(const char *path, struct statfs *buf)
+{
+    (void) path;
+
+    buf->f_namelen = 255;
+    buf->f_bsize = 512;
+    buf->f_blocks = 999999999 * 2;
+    buf->f_bfree =  999999999 * 2;
+    buf->f_bavail = 999999999 * 2;
+    buf->f_files =  999999999;
+    buf->f_ffree =  999999999;
+    return 0;
+}
+
 static int processing_init(void)
 {
     pthread_mutex_init(&lock, NULL);
@@ -1782,6 +1796,7 @@ static struct fuse_cache_operations sshfs_oper = {
         .release    = sshfs_release,
         .read       = sshfs_read,
         .write      = sshfs_write,
+        .statfs     = sshfs_statfs,
     },
     .cache_getdir = sshfs_getdir,
 };
@@ -1807,7 +1822,7 @@ static void usage(const char *progname)
 "    -o rename_workaround   work around problem renaming to existing file\n"
 "    -o idmap=TYPE          user/group ID mapping, possible types are:\n"
 "             none             no translation of the ID space (default)\n"
-"             user             only translate ID of connecting user\n"
+"             user             only translate UID of connecting user\n"
 "    -o ssh_command=CMD     execute CMD instead of 'ssh'\n"
 "    -o directport=PORT     directly connect to PORT bypassing ssh\n"
 "    -o SSHOPT=VAL          ssh options (see man ssh_config)\n"
